@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1000" viewBox="0 0 1600 1000">
+<rect width="1600" height="1000" fill="#f6f6f9"/><rect x="160" y="100" width="1280" height="800" fill="#fff"/><rect x="160" y="100" width="300" height="800" fill="#282b32"/>
+<text x="225" y="185" font-family="Arial" font-size="28" fill="#fff" font-weight="700">USAGI</text><text x="225" y="250" font-family="Arial" font-size="14" fill="#9aa0aa">RELATIONSHIP REPORT</text>
+<circle cx="310" cy="430" r="90" fill="#786efa"/><circle cx="277" cy="412" r="8" fill="#fff"/><circle cx="343" cy="412" r="8" fill="#fff"/><path d="M284 458q26 22 52 0" fill="none" stroke="#fff" stroke-width="6" stroke-linecap="round"/>
+<text x="540" y="250" font-family="Arial" font-size="50" fill="#000" font-weight="700">Conversation, decoded.</text><text x="540" y="310" font-family="Arial" font-size="19" fill="#737d8c">대화 속 관계의 흐름을 읽기 쉽게 보여줍니다.</text>
+<rect x="540" y="400" width="740" height="120" fill="#fbfbfb"/><text x="580" y="445" font-family="Arial" font-size="13" fill="#737d8c">CURRENT SIGNAL</text><text x="580" y="487" font-family="Arial" font-size="26" fill="#000" font-weight="700">관심은 높지만 표현은 조심스럽습니다.</text>
+<rect x="540" y="555" width="225" height="140" fill="#f6f6f9"/><rect x="790" y="555" width="225" height="140" fill="#f6f6f9"/><rect x="1040" y="555" width="240" height="140" fill="#786efa"/>
+<text x="580" y="615" font-family="Arial" font-size="15" fill="#737d8c">TONE</text><text x="580" y="655" font-family="Arial" font-size="26" fill="#000" font-weight="700">CALM</text><text x="830" y="615" font-family="Arial" font-size="15" fill="#737d8c">PACE</text><text x="830" y="655" font-family="Arial" font-size="26" fill="#000" font-weight="700">FAST</text><text x="1080" y="615" font-family="Arial" font-size="15" fill="#fff">MATCH</text><text x="1080" y="655" font-family="Arial" font-size="26" fill="#fff" font-weight="700">82%</text>
+</svg>

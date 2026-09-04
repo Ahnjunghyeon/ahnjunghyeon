@@ -1,0 +1,17 @@
+<svg width="1600" height="1000" viewBox="0 0 1600 1000" fill="none" xmlns="http://www.w3.org/2000/svg">
+<rect width="1600" height="1000" fill="#F6F6F9"/>
+<rect x="90" y="76" width="1420" height="848" fill="white"/>
+<text x="145" y="160" fill="#000" font-family="Arial, sans-serif" font-weight="700" font-size="30">BAP</text>
+<text x="145" y="205" fill="#737D8C" font-family="Arial, sans-serif" font-size="18">BAP PRESIDENT</text>
+<rect x="145" y="275" width="650" height="470" fill="#FBFBFB"/>
+<circle cx="470" cy="500" r="150" fill="#786EFA"/>
+<circle cx="470" cy="500" r="104" fill="white"/>
+<text x="387" y="512" fill="#000" font-family="Arial, sans-serif" font-weight="700" font-size="30">오늘 뭐 먹지?</text>
+<rect x="855" y="275" width="600" height="112" fill="#282B32"/>
+<text x="900" y="345" fill="white" font-family="Arial, sans-serif" font-weight="700" font-size="28">밥 프레지던트</text>
+<rect x="855" y="415" width="600" height="150" fill="#F6F6F9"/>
+<rect x="855" y="590" width="286" height="155" fill="#F6F6F9"/>
+<rect x="1169" y="590" width="286" height="155" fill="#F6F6F9"/>
+<rect x="855" y="785" width="220" height="58" fill="#786EFA"/>
+<text x="913" y="822" fill="white" font-family="Arial, sans-serif" font-weight="700" font-size="18">START</text>
+</svg>

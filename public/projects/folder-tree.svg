@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1000" viewBox="0 0 1600 1000">
+<rect width="1600" height="1000" fill="#f6f6f9"/><rect x="145" y="118" width="1310" height="764" fill="#fff"/>
+<rect x="145" y="118" width="1310" height="62" fill="#282b32"/><circle cx="185" cy="149" r="7" fill="#786efa"/><text x="215" y="156" font-family="Arial" font-size="16" fill="white" font-weight="700">FOLDER TREE</text>
+<text x="240" y="295" font-family="Arial" font-size="50" fill="#000" font-weight="700">Copy the structure.</text><text x="240" y="348" font-family="Arial" font-size="22" fill="#737d8c">Keep only what matters.</text>
+<rect x="240" y="430" width="430" height="300" fill="#fbfbfb"/><text x="280" y="490" font-family="Arial" font-size="17" fill="#737d8c">SOURCE</text>
+<g fill="none" stroke="#000" stroke-width="4"><path d="M285 550h52l18 20h110v72H285z"/><path d="M320 655h42l14 15h88v54H320z"/></g>
+<rect x="760" y="430" width="420" height="300" fill="#282b32"/><text x="800" y="490" font-family="Arial" font-size="17" fill="#bfc4cf">RESULT</text><text x="800" y="610" font-family="Arial" font-size="86" fill="#786efa" font-weight="700">ZIP</text>
+<rect x="1190" y="430" width="170" height="300" fill="#786efa"/><text x="1275" y="586" text-anchor="middle" font-family="Arial" font-size="20" fill="white" font-weight="700">BUILD</text>
+</svg>

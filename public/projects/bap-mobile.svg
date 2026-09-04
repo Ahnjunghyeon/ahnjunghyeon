@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="750" height="1500" viewBox="0 0 750 1500">
+<rect width="750" height="1500" fill="#fffaf0"/><text x="54" y="112" font-family="Arial" font-size="30" font-weight="700" fill="#24221f">BAP.P</text><text x="54" y="205" font-family="Arial" font-size="44" font-weight="700" fill="#24221f">오늘 뭐 먹지?</text><text x="54" y="254" font-family="Arial" font-size="18" fill="#7c776f">결정이 귀찮을 땐 가볍게 고르기</text>
+<circle cx="375" cy="520" r="190" fill="#f1ece4"/><circle cx="375" cy="520" r="128" fill="#786efa"/><text x="375" y="536" text-anchor="middle" font-family="Arial" font-size="34" font-weight="700" fill="#fff">PICK!</text>
+<rect x="54" y="790" width="642" height="150" rx="32" fill="#fff"/><text x="86" y="850" font-family="Arial" font-size="14" fill="#7c776f">TODAY'S PICK</text><text x="86" y="900" font-family="Arial" font-size="28" font-weight="700" fill="#24221f">따뜻한 국물 어때요?</text>
+<rect x="54" y="980" width="306" height="150" rx="32" fill="#fff"/><rect x="390" y="980" width="306" height="150" rx="32" fill="#fff"/><text x="207" y="1067" text-anchor="middle" font-family="Arial" font-size="20" fill="#24221f">다시 고르기</text><text x="543" y="1067" text-anchor="middle" font-family="Arial" font-size="20" fill="#24221f">이걸로!</text>
+</svg>

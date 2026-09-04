@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="750" height="1500" viewBox="0 0 750 1500">
+<rect width="750" height="1500" fill="#f8f6ff"/><text x="54" y="112" font-family="Arial" font-size="30" font-weight="700" fill="#24221f">USAGI</text><circle cx="665" cy="92" r="10" fill="#786efa"/><text x="54" y="210" font-family="Arial" font-size="42" font-weight="700" fill="#24221f">우리 사이의 기류</text><text x="54" y="258" font-family="Arial" font-size="18" fill="#7c776f">대화를 조금 다르게 읽어보기</text>
+<rect x="54" y="330" width="642" height="310" rx="34" fill="#fff"/><circle cx="375" cy="455" r="72" fill="#786efa"/><circle cx="349" cy="444" r="7" fill="#fff"/><circle cx="401" cy="444" r="7" fill="#fff"/><path d="M353 486q22 18 44 0" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round"/><text x="375" y="588" text-anchor="middle" font-family="Arial" font-size="24" font-weight="700" fill="#24221f">대화 분석 준비 완료</text>
+<rect x="54" y="684" width="642" height="180" rx="30" fill="#fff"/><text x="84" y="740" font-family="Arial" font-size="13" fill="#7c776f">RELATIONSHIP REPORT</text><text x="84" y="793" font-family="Arial" font-size="27" font-weight="700" fill="#24221f">대화의 온도가 조금 올라갔어요</text>
+<rect x="54" y="900" width="642" height="150" rx="30" fill="#fff"/><rect x="54" y="1084" width="642" height="150" rx="30" fill="#fff"/>
+</svg>
