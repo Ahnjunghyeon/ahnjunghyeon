@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from "react";
 
 type MediaKind = "mobile" | "web" | "responsive" | "desktop-app";
-type FridgePhase = "closed" | "opening" | "search" | "present" | "closing";
+type NotePhase = "settled" | "switching" | "entering";
 
 type IntroNote = {
   id: string;
@@ -11,7 +11,17 @@ type IntroNote = {
   label: string;
   title: string;
   description: string;
-  symbol: string;
+};
+
+type Profile = {
+  englishName: string;
+  roleLabel: string;
+  eyebrow: string;
+  headlineTop: string;
+  headlineBottom: string;
+  introTitle: string;
+  introParagraphs: string[];
+  introHighlight: string;
 };
 
 type Project = {
@@ -37,41 +47,50 @@ type Project = {
   };
 };
 
-
 const introNotes: IntroNote[] = [
   {
     id: "observe",
     number: "01",
     label: "HOW I THINK",
-    title: "불편함을 그냥 지나치지 않습니다.",
-    description: "한 번 더 눌러야 하거나, 매번 반복해야 하는 순간을 보면 왜 그런지 먼저 생각합니다.",
-    symbol: "?",
+    title: "작은 불편도 그냥 넘기지 않습니다.",
+    description: "반복되거나 애매한 흐름을 보면 왜 불편한지 먼저 관찰하고, 더 자연스러운 방식으로 풀어내려 합니다.",
   },
   {
     id: "build",
     number: "02",
     label: "HOW I BUILD",
-    title: "화면에서 끝내지 않습니다.",
-    description: "프론트엔드를 중심으로 필요한 API와 AI를 연결해 실제로 동작하고 배포되는 형태까지 만듭니다.",
-    symbol: "+",
+    title: "아이디어를 실제 서비스까지 연결합니다.",
+    description: "UI만 예쁘게 만드는 데서 끝내지 않고, 필요한 로직과 AI를 붙여 직접 쓰고 배포할 수 있는 결과물까지 만듭니다.",
   },
   {
     id: "flow",
     number: "03",
     label: "WHAT I CARE ABOUT",
-    title: "쓰는 사람의 흐름을 중요하게 봅니다.",
-    description: "기능을 많이 넣기보다 처음 들어온 사람이 이해하고 자연스럽게 사용할 수 있는지를 먼저 봅니다.",
-    symbol: "→",
+    title: "처음 들어온 사람의 흐름을 중요하게 봅니다.",
+    description: "기능을 많이 넣기보다 처음 보는 사람도 바로 이해하고 움직일 수 있는 구조를 더 중요하게 생각합니다.",
   },
   {
     id: "play",
     number: "04",
     label: "WHAT I ENJOY",
-    title: "조금 엉뚱한 아이디어도 좋아합니다.",
-    description: "생활 속 작은 불편이나 재미있는 상상을 실제로 만져볼 수 있는 제품으로 만드는 걸 좋아합니다.",
-    symbol: "✦",
+    title: "AI와 바이브코딩으로 빠르게 실험합니다.",
+    description: "생활 속 아이디어, 재미있는 상상, 업무 불편함을 빠르게 프로토타입으로 만들고 실제 서비스로 다듬는 과정을 좋아합니다.",
   },
 ];
+
+const profile: Profile = {
+  englishName: "HYEON_BIT",
+  roleLabel: "현빗 | AI 바이브코딩",
+  eyebrow: "HYEON_BIT / SIDE PROJECT / BUILD",
+  headlineTop: "현빗의",
+  headlineBottom: "사이드프로젝트 개발 페이지",
+  introTitle: "아이디어를 AI와 바이브코딩으로 실제 제품까지 연결합니다.",
+  introParagraphs: [
+    "프론트엔드를 중심으로 직접 기획하고 만들며, 바로 써볼 수 있는 서비스와 도구를 만드는 것을 좋아합니다.",
+    "이 페이지는 이력서보다 결과물과 작업 방식을 먼저 보여주는 현빗의 사이드프로젝트 개발 페이지입니다.",
+  ],
+  introHighlight: "아래 프로젝트는 그렇게 만들어진 서비스들이고, 이 포스트잇에는 제가 일하는 방식과 생각이 담겨 있습니다.",
+};
 
 const projects: Project[] = [
   {
@@ -222,13 +241,23 @@ function ProjectMedia({ project, modal = false }: { project: Project; modal?: bo
   );
 }
 
+const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value));
+const easeOutCubic = (t: number) => 1 - Math.pow(1 - t, 3);
+
 export default function Home() {
   const [selected, setSelected] = useState<Project | null>(null);
-  const [introNoteIndex, setIntroNoteIndex] = useState(-1);
-  const [fridgePhase, setFridgePhase] = useState<FridgePhase>("closed");
-  const fridgeTimers = useRef<number[]>([]);
+  const [introNoteIndex, setIntroNoteIndex] = useState(0);
+  const [notePhase, setNotePhase] = useState<NotePhase>("settled");
+  const [peelProgress, setPeelProgress] = useState(0);
+  const [isDraggingNote, setIsDraggingNote] = useState(false);
+
   const closeButtonRef = useRef<HTMLButtonElement | null>(null);
   const previouslyFocusedRef = useRef<HTMLElement | null>(null);
+  const noteTimerRef = useRef<number | null>(null);
+  const animationFrameRef = useRef<number | null>(null);
+  const dragPointerIdRef = useRef<number | null>(null);
+  const dragStartXRef = useRef<number | null>(null);
+  const skipClickRef = useRef(false);
 
   useEffect(() => {
     if (!selected) return;
@@ -249,188 +278,256 @@ export default function Home() {
     };
   }, [selected]);
 
-  useEffect(() => () => {
-    fridgeTimers.current.forEach((timer) => window.clearTimeout(timer));
+  useEffect(() => {
+    return () => {
+      if (noteTimerRef.current) window.clearTimeout(noteTimerRef.current);
+      if (animationFrameRef.current) window.cancelAnimationFrame(animationFrameRef.current);
+    };
   }, []);
 
-  const introNote = introNoteIndex >= 0 ? introNotes[introNoteIndex] : null;
-  const fridgeBusy = fridgePhase === "opening" || fridgePhase === "search" || fridgePhase === "closing";
-  const fridgeIsOpen = fridgePhase === "present" || fridgePhase === "search" || fridgePhase === "opening";
+  const introNote = introNotes[introNoteIndex];
+  const noteBusy = notePhase !== "settled";
 
-  const clearFridgeTimers = () => {
-    fridgeTimers.current.forEach((timer) => window.clearTimeout(timer));
-    fridgeTimers.current = [];
+  const stopAnimations = () => {
+    if (noteTimerRef.current) {
+      window.clearTimeout(noteTimerRef.current);
+      noteTimerRef.current = null;
+    }
+    if (animationFrameRef.current) {
+      window.cancelAnimationFrame(animationFrameRef.current);
+      animationFrameRef.current = null;
+    }
   };
 
-  const runFridgeSequence = (steps: Array<{ after: number; phase: FridgePhase; advance?: boolean }>) => {
-    clearFridgeTimers();
-    steps.forEach(({ after, phase, advance }) => {
-      fridgeTimers.current.push(window.setTimeout(() => {
-        if (advance) setIntroNoteIndex((current) => (current + 1) % introNotes.length);
-        setFridgePhase(phase);
-      }, after));
+  const animateProgress = (from: number, to: number, duration: number, onComplete?: () => void) => {
+    stopAnimations();
+    const start = performance.now();
+
+    const step = (now: number) => {
+      const elapsed = now - start;
+      const t = clamp(elapsed / duration, 0, 1);
+      const eased = easeOutCubic(t);
+      const next = from + (to - from) * eased;
+      setPeelProgress(next);
+
+      if (t < 1) {
+        animationFrameRef.current = window.requestAnimationFrame(step);
+      } else {
+        animationFrameRef.current = null;
+        onComplete?.();
+      }
+    };
+
+    animationFrameRef.current = window.requestAnimationFrame(step);
+  };
+
+  const showNextNote = () => {
+    setIntroNoteIndex((current) => (current + 1) % introNotes.length);
+    setPeelProgress(0);
+    setNotePhase("entering");
+    noteTimerRef.current = window.setTimeout(() => {
+      setNotePhase("settled");
+      noteTimerRef.current = null;
+    }, 220);
+  };
+
+  const triggerNoteChange = (fromProgress = peelProgress) => {
+    if (noteBusy) return;
+    setIsDraggingNote(false);
+    setNotePhase("switching");
+    animateProgress(fromProgress, 1, 420, () => {
+      noteTimerRef.current = window.setTimeout(() => {
+        showNextNote();
+      }, 24);
     });
   };
 
-  const openAndRetrieve = () => {
-    if (fridgeBusy || fridgePhase !== "closed") return;
-    setFridgePhase("opening");
-    runFridgeSequence([
-      { after: 360, phase: "search" },
-      { after: 860, phase: "present", advance: true },
-    ]);
+  const handlePostitClick = () => {
+    if (skipClickRef.current) {
+      skipClickRef.current = false;
+      return;
+    }
+    if (isDraggingNote || noteBusy) return;
+    triggerNoteChange(0);
   };
 
-  const retrieveNext = () => {
-    if (fridgeBusy || !fridgeIsOpen) return;
-    setFridgePhase("search");
-    runFridgeSequence([{ after: 520, phase: "present", advance: true }]);
+  const handlePostitPointerDown = (event: ReactPointerEvent<HTMLButtonElement>) => {
+    if (noteBusy) return;
+    const rect = event.currentTarget.getBoundingClientRect();
+    const offsetX = event.clientX - rect.left;
+    const offsetY = event.clientY - rect.top;
+    const insidePeelZone = offsetX >= rect.width * 0.6 && offsetY >= rect.height * 0.45;
+    if (!insidePeelZone) return;
+
+    stopAnimations();
+    dragPointerIdRef.current = event.pointerId;
+    dragStartXRef.current = event.clientX;
+    skipClickRef.current = false;
+    setIsDraggingNote(true);
+    setNotePhase("settled");
+    event.currentTarget.setPointerCapture(event.pointerId);
   };
 
-  const closeFridge = () => {
-    if (fridgeBusy || !fridgeIsOpen) return;
-    setFridgePhase("closing");
-    runFridgeSequence([{ after: 360, phase: "closed" }]);
+  const handlePostitPointerMove = (event: ReactPointerEvent<HTMLButtonElement>) => {
+    if (!isDraggingNote || dragPointerIdRef.current !== event.pointerId || dragStartXRef.current === null) return;
+    const deltaX = Math.max(0, dragStartXRef.current - event.clientX);
+    const progress = clamp(deltaX / 140, 0, 1);
+    setPeelProgress(progress);
   };
 
-  const handleFridgeClick = () => {
-    if (fridgePhase === "closed") openAndRetrieve();
-    else closeFridge();
+  const handlePostitPointerUp = (event: ReactPointerEvent<HTMLButtonElement>) => {
+    if (dragPointerIdRef.current !== event.pointerId) return;
+    event.currentTarget.releasePointerCapture(event.pointerId);
+    dragPointerIdRef.current = null;
+    dragStartXRef.current = null;
+    setIsDraggingNote(false);
+
+    if (peelProgress >= 0.36) {
+      skipClickRef.current = true;
+      triggerNoteChange(peelProgress);
+    } else {
+      skipClickRef.current = true;
+      animateProgress(peelProgress, 0, 240, () => {
+        setPeelProgress(0);
+      });
+    }
   };
 
-  const handleHintClick = () => {
-    if (fridgePhase === "closed") openAndRetrieve();
-    else retrieveNext();
+  const handlePostitPointerCancel = () => {
+    dragPointerIdRef.current = null;
+    dragStartXRef.current = null;
+    setIsDraggingNote(false);
+    animateProgress(peelProgress, 0, 180, () => {
+      setPeelProgress(0);
+    });
   };
 
   return (
     <main>
       <header className="site-header">
-        <a className="wordmark" href="#top" aria-label="홈으로 이동">AHN JUNGHYEON</a>
-        <nav aria-label="주요 메뉴"><a href="#projects">Projects</a><a href="#contact">Contact</a></nav>
+        <div className="site-header-inner page-shell">
+          <a className="wordmark" href="#top" aria-label="홈으로 이동">· {profile.englishName}</a>
+          <nav aria-label="주요 메뉴"><a href="#projects">Projects</a><a href="#contact">Contact</a></nav>
+        </div>
       </header>
 
-      <section className="hero hero-playground" id="top">
-        <div className="hero-kicker"><span className="live-dot" /> PRODUCT BUILDER · FRONTEND DEVELOPER</div>
+      <section className="hero hero-notes" id="top">
+        <div className="page-shell hero-inner">
+          <div className="hero-kicker"><span className="live-dot" /> {profile.roleLabel}</div>
 
-        <div className="hero-stage">
-          <div className="hero-statement">
-            <p className="hero-eyebrow">AHN JUNGHYEON · SEOUL</p>
-            <h1>생각한 건,<span>직접 만들어봅니다.</span></h1>
-            <p className="hero-subcopy hero-personal-copy">
-              프론트엔드 개발을 중심으로, 떠오른 생각을 실제로 만져볼 수 있는 형태까지 만드는 일을 좋아합니다.
-              <strong> 냉장고를 열면 제가 어떤 방식으로 생각하고 만드는지 하나씩 꺼내볼 수 있습니다.</strong>
-            </p>
-            <p className="hero-signature">A FEW THINGS ABOUT ME, KEPT COOL.</p>
+          <div className="hero-stage">
+            <div className="hero-statement">
+              <p className="hero-eyebrow">{profile.eyebrow}</p>
+              <h1>{profile.headlineTop}<span>{profile.headlineBottom}</span></h1>
+              <p className="hero-intro-title">{profile.introTitle}</p>
+              <div className="hero-subcopy hero-personal-copy">
+                {profile.introParagraphs.map((paragraph) => (
+                  <p key={paragraph}>{paragraph}</p>
+                ))}
+                <p><strong>{profile.introHighlight}</strong></p>
+              </div>
+              <p className="hero-signature">A FEW NOTES ABOUT HYEON_BIT.</p>
+            </div>
+
+            <div className={`playground note-playground phase-${notePhase}`} aria-live="polite">
+              <div className="notes-caption">
+                <span>NOTE BOARD · ABOUT ME</span>
+                <strong>{introNote.number} / {String(introNotes.length).padStart(2, "0")}</strong>
+              </div>
+
+              <div className="notes-scene">
+                <div className="note-board" aria-hidden="true" />
+                <button
+                  type="button"
+                  className={`postit-stack ${isDraggingNote ? "is-dragging" : ""}`}
+                  onClick={handlePostitClick}
+                  onPointerDown={handlePostitPointerDown}
+                  onPointerMove={handlePostitPointerMove}
+                  onPointerUp={handlePostitPointerUp}
+                  onPointerCancel={handlePostitPointerCancel}
+                  disabled={noteBusy}
+                  aria-label="포스트잇을 눌러 다음 소개 메모 보기"
+                  style={{ ["--peel-progress" as string]: String(peelProgress) }}
+                >
+                  <span className="postit-under under-one" aria-hidden="true" />
+                  <span className="postit-under under-two" aria-hidden="true" />
+                  <span className="postit-note">
+                    <span className="postit-content">
+                      <span className="postit-label">{introNote.label}</span>
+                      <strong>{introNote.title}</strong>
+                      <p>{introNote.description}</p>
+                      <span className="postit-index">{introNote.number}</span>
+                    </span>
+                    <span className="postit-peel-shadow" aria-hidden="true" />
+                    <span className="postit-peel-sheet" aria-hidden="true" />
+                  </span>
+                </button>
+              </div>
+
+              <div className="hero-product-result note-result is-visible">
+                <span className="hero-product-number">CLICK OR DRAG THE CORNER</span>
+                <strong className="hero-about-title">한 장씩 넘기며 현빗을 소개합니다.</strong>
+                <p>오른쪽 아래를 왼쪽으로 살짝 끌어당기거나 포스트잇을 클릭해 다음 메모를 볼 수 있습니다.</p>
+              </div>
+
+              <button type="button" className="playground-hint" onClick={() => triggerNoteChange(0)} disabled={noteBusy}>
+                NEXT NOTE <span>↑</span>
+              </button>
+            </div>
           </div>
 
-          <div className={`playground fridge-playground phase-${fridgePhase}`} aria-live="polite">
-            <div className="fridge-caption">
-              <span>IDEA STORAGE · ABOUT ME</span>
-              <strong>{introNote ? `${introNote.number} / ${String(introNotes.length).padStart(2, "0")}` : "OPEN THE FRIDGE"}</strong>
-            </div>
-
-            <div className="fridge-scene">
-              <button
-                type="button"
-                className="fridge-button"
-                onClick={handleFridgeClick}
-                disabled={fridgeBusy}
-                aria-label={fridgePhase === "closed" ? "냉장고를 열고 소개 메모 꺼내기" : "열려 있는 냉장고 닫기"}
-                aria-expanded={fridgeIsOpen}
-              >
-                <span className="fridge-shell">
-                  <span className="fridge-inner">
-                    <span className="fridge-shelf shelf-one" /><span className="fridge-shelf shelf-two" />
-                    <span className="stored-idea idea-one" /><span className="stored-idea idea-two" /><span className="stored-idea idea-three" />
-                  </span>
-                  <span className="fridge-door">
-                    <span className="fridge-handle" /><span className="fridge-badge">IDEAS</span>
-                    <span className="fridge-note">next idea?</span><span className="fridge-magnet" aria-hidden="true" />
-                  </span>
-                  <span className="fridge-bottom-line" />
-                </span>
-              </button>
-
-              <button
-                type="button"
-                className="fridge-builder"
-                onClick={retrieveNext}
-                disabled={fridgeBusy || fridgePhase === "closed"}
-                aria-label={fridgePhase === "closed" ? "냉장고를 먼저 열어주세요" : "캐릭터를 눌러 다음 소개 메모 꺼내기"}
-              >
-                <span className="builder-head"><span className="builder-eye left" /><span className="builder-eye right" /></span>
-                <span className="builder-body" /><span className="builder-arm left" /><span className="builder-arm right" />
-                <span className="builder-leg left" /><span className="builder-leg right" />
-                <span className="presented-product"><span className="presented-icon">{introNote ? introNote.symbol : "+"}</span></span>
-              </button>
-            </div>
-
-            <div className={`hero-product-result ${introNote ? "is-visible" : ""}`}>
-              {introNote ? (
-                <>
-                  <span className="hero-product-number">{introNote.label}</span>
-                  <strong className="hero-about-title">{introNote.title}</strong>
-                  <p>{introNote.description}</p>
-                </>
-              ) : (
-                <>
-                  <span className="hero-product-number">A LITTLE ABOUT ME.</span>
-                  <strong>냉장고를 열어보세요.</strong>
-                  <p>캐릭터가 제 생각과 만드는 방식에 대한 메모를 하나씩 꺼내드립니다.</p>
-                </>
-              )}
-            </div>
-
-            <button type="button" className="playground-hint" onClick={handleHintClick} disabled={fridgeBusy}>
-              {fridgePhase === "closed" ? "OPEN THE FRIDGE" : fridgeBusy ? "LOOKING..." : "CHARACTER = NEXT · FRIDGE = CLOSE"} <span>↻</span>
-            </button>
-          </div>
+          <a className="hero-scroll" href="#projects">SEE SIDE PROJECTS <span>↓</span></a>
         </div>
-        <a className="hero-scroll" href="#projects">SEE WHAT I BUILT <span>↓</span></a>
       </section>
 
       <section className="projects-section" id="projects">
-        <div className="section-heading side-project-heading">
-          <h2>SIDE PROJECT</h2>
-          <p>작게 시작해, 실제로 사용할 수 있는 형태까지 만든 프로젝트들입니다.</p>
-        </div>
+        <div className="page-shell section-shell">
+          <div className="section-heading side-project-heading">
+            <h2>SIDE PROJECT</h2>
+            <p>현빗이 직접 만들고 배포해 본 서비스와 도구들입니다.</p>
+          </div>
 
-        <div className="project-grid">
-          {projects.map((project) => (
-            <article className={`project-card project-card-${project.mediaKind}`} key={project.id}>
-              <div className="project-card-head">
-                <div className="project-title-line"><span>{project.number}</span><h3>{project.title}</h3></div>
-                <span className="project-platform">{project.category}</span>
-              </div>
-              <button className="project-visual" type="button" onClick={() => setSelected(project)} aria-label={`${project.title} 상세 보기`}>
-                <ProjectMedia project={project} />
-                <span className="visual-overlay">VIEW</span>
-              </button>
-              <div className="project-card-foot">
-                <p>{project.summary}</p>
-                <div className="project-actions">
-                  <button type="button" onClick={() => setSelected(project)}>Info</button>
-                  {project.href ? (
-                    <a href={project.href} target="_blank" rel="noreferrer">Open <ArrowUpRight /></a>
-                  ) : project.download ? (
-                    <a href={project.download.primary} download={project.download.filename}>Download ↓</a>
-                  ) : (
-                    <span className="coming-soon">Windows app</span>
-                  )}
+          <div className="project-grid">
+            {projects.map((project) => (
+              <article className={`project-card project-card-${project.mediaKind}`} key={project.id}>
+                <div className="project-card-head">
+                  <div className="project-title-line"><span>{project.number}</span><h3>{project.title}</h3></div>
+                  <span className="project-platform">{project.category}</span>
                 </div>
-              </div>
-            </article>
-          ))}
+                <button className="project-visual" type="button" onClick={() => setSelected(project)} aria-label={`${project.title} 상세 보기`}>
+                  <ProjectMedia project={project} />
+                  <span className="visual-overlay">VIEW</span>
+                </button>
+                <div className="project-card-foot">
+                  <p>{project.summary}</p>
+                  <div className="project-actions">
+                    <button type="button" onClick={() => setSelected(project)}>Info</button>
+                    {project.href ? (
+                      <a href={project.href} target="_blank" rel="noreferrer">Open <ArrowUpRight /></a>
+                    ) : project.download ? (
+                      <a href={project.download.primary} download={project.download.filename}>Download ↓</a>
+                    ) : (
+                      <span className="coming-soon">Windows app</span>
+                    )}
+                  </div>
+                </div>
+              </article>
+            ))}
+          </div>
         </div>
       </section>
 
       <section className="contact-section" id="contact">
-        <p>CONTACT</p><h2>같이 만들어보고 싶은 아이디어가 있으신가요?</h2>
-        <div className="contact-bottom"><p>기획부터 화면, 인터랙션, 구현까지 편하게 이야기하며 함께 만들어갑니다.</p><a href="mailto:your-email@example.com">your-email@example.com <ArrowUpRight /></a></div>
+        <div className="page-shell contact-shell">
+          <p>CONTACT</p>
+          <h2>현빗과 함께 만들어보고 싶은 아이디어가 있다면 편하게 연락해주세요.</h2>
+          <div className="contact-bottom"><p>작은 아이디어부터 실제 서비스 프로토타입까지 함께 이야기할 수 있습니다.</p><a href="mailto:your-email@example.com">your-email@example.com <ArrowUpRight /></a></div>
+        </div>
       </section>
 
-      <footer><span>© 2026 AHN JUNGHYEON</span><a href="#top">BACK TO TOP ↑</a></footer>
+      <footer>
+        <div className="page-shell footer-shell"><span>© 2026 HYEON_BIT</span><a href="#top">BACK TO TOP ↑</a></div>
+      </footer>
 
       {selected && (
         <div className="modal-backdrop" role="presentation" onClick={() => setSelected(null)}>
